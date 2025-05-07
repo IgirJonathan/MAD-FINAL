@@ -8,6 +8,7 @@ import Confirmation from './src/pages/Confirmation';
 import OrderCompleted from './src/pages/OrderCompleted'; // Tambahkan screen baru
 import HistoryScreen from './src/pages/HistoryScreen';
 import ProfileScreen from './src/pages/ProfileScreen';
+import './src/config/Firebase'
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';

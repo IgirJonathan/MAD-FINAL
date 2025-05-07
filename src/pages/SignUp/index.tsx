@@ -11,7 +11,9 @@ import {
 import { launchImageLibrary } from 'react-native-image-picker';
 import { showMessage } from 'react-native-flash-message';
 import { Gap } from '../../components/atoms';
-import { NullPhoto } from '../../assets'; // pastikan NullPhoto ini ada
+import { NullPhoto } from '../../assets';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getDatabase, ref, set } from 'firebase/database';
 
 const Signup = ({ navigation }) => {
   const [photo, setPhoto] = useState(NullPhoto);
@@ -19,10 +21,40 @@ const Signup = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleContinue = () => {
-    console.log({ username, email, password, photo });
-    // Navigasi setelah signup berhasil
-    navigation.navigate('SignIn');
+  const handleContinue = async () => {
+    if (!email || !password || !username) {
+      showMessage({
+        message: 'Semua field harus diisi.',
+        type: 'danger',
+      });
+      return;
+    }
+
+    try {
+      const auth = getAuth();
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Simpan data user ke Realtime Database
+      const db = getDatabase();
+      await set(ref(db, 'users/' + user.uid), {
+        username: username,
+        email: email,
+        profile_picture: photo.uri || null,
+      });
+
+      showMessage({
+        message: 'Registrasi berhasil. Silakan login.',
+        type: 'success',
+      });
+
+      navigation.navigate('SignIn');
+    } catch (error) {
+      showMessage({
+        message: error.message,
+        type: 'danger',
+      });
+    }
   };
 
   const getImage = async () => {
@@ -59,7 +91,6 @@ const Signup = ({ navigation }) => {
         </TouchableOpacity>
 
         <Text style={styles.title}>SIGN UP</Text>
-
         <Gap height={36} />
 
         {/* Form */}
@@ -72,7 +103,6 @@ const Signup = ({ navigation }) => {
             placeholderTextColor="#94a3b8"
             style={styles.input}
           />
-
           <Gap height={24} />
 
           <Text style={styles.inputLabel}>Email</Text>
@@ -85,7 +115,6 @@ const Signup = ({ navigation }) => {
             autoCapitalize="none"
             style={styles.input}
           />
-
           <Gap height={24} />
 
           <Text style={styles.inputLabel}>Password</Text>

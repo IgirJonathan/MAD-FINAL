@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { showMessage } from 'react-native-flash-message';
+import { getAuth, signOut } from 'firebase/auth';
 import { NullPhoto } from '../../assets'; // default profile image
 
 const UserProfileScreen = ({ navigation }) => {
@@ -46,8 +47,29 @@ const UserProfileScreen = ({ navigation }) => {
     });
   };
 
+  const handleLogout = () => {
+    const auth = getAuth();
+    signOut(auth)
+      .then(() => {
+        showMessage({
+          message: 'Berhasil logout.',
+          type: 'success',
+        });
+        navigation.replace('SignIn');
+      })
+      .catch(error => {
+        showMessage({
+          message: error.message,
+          type: 'danger',
+        });
+      });
+  };
+
   return (
-    <ScrollView style={styles.scrollContainer}>
+    <ScrollView
+      style={styles.scrollContainer}
+      contentContainerStyle={styles.scrollContent}
+    >
       <View style={styles.pageContainer}>
         {/* Back Button */}
         <TouchableOpacity
@@ -98,6 +120,10 @@ const UserProfileScreen = ({ navigation }) => {
         <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
           <Text style={styles.confirmText}>Confirm</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutText}>Log Out</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -110,11 +136,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f0f9ff',
   },
-  pageContainer: {
-    flex: 1,
+  scrollContent: {
+    flexGrow: 1,
     alignItems: 'center',
     paddingHorizontal: 24,
     paddingTop: 40,
+    paddingBottom: 40,
+  },
+  pageContainer: {
+    width: '100%',
+    alignItems: 'center',
   },
   backButton: {
     alignSelf: 'flex-start',
@@ -172,10 +203,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#87CEFA',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 40,
+    marginBottom: 20,
   },
   confirmText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  logoutButton: {
+    width: 150,
+    height: 45,
+    borderRadius: 22.5,
+    backgroundColor: '#FF6B6B',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoutText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
