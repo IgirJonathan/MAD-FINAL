@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,45 +7,68 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
+import { getDatabase, ref, onValue } from 'firebase/database';
+import { getAuth } from 'firebase/auth';
+import { showMessage } from 'react-native-flash-message';
 
-const dummyHistory = [
-  {
-    id: '1',
-    service: 'Wash And Fold',
-    date: '2025-05-07',
-    weight: '5 KG',
-    payment: 'Cash',
-    location: 'Jl. Sudirman No. 123',
-  },
-  {
-    id: '2',
-    service: 'Dry Wash',
-    date: '2025-05-03',
-    weight: '3 KG',
-    payment: 'Debit',
-    location: 'Bitung Lorong Pakadoodan',
-  },
-];
+const HistoryItem = ({ item }) => {
+  const formattedDate = item.createdAt
+    ? new Date(item.createdAt).toLocaleDateString()
+    : 'Unknown';
 
-const HistoryItem = ({ item }) => (
-  <View style={styles.card}>
-    <Text style={styles.title}>{item.service}</Text>
-    <Text>Date: {item.date}</Text>
-    <Text>Weight: {item.weight}</Text>
-    <Text>Payment: {item.payment}</Text>
-    <Text>Location: {item.location}</Text>
-  </View>
-);
+  return (
+    <View style={styles.card}>
+      <Text style={styles.title}>Wash And Fold</Text>
+      <Text>Date: {formattedDate}</Text>
+      <Text>Weight: {item.weight || 'N/A'} KG</Text>
+      <Text>Payment: {item.paymentMethod || 'N/A'}</Text>
+      <Text>Location: {item.location || 'N/A'}</Text>
+      {item.notes ? <Text>Notes: {item.notes}</Text> : null}
+    </View>
+  );
+};
+
 
 const HistoryScreen = ({ navigation }) => {
+  const [historyData, setHistoryData] = useState([]);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (user) {
+      const db = getDatabase();
+      const ordersRef = ref(db, 'orders/' + user.uid);
+
+      onValue(ordersRef, snapshot => {
+        const data = snapshot.val();
+        if (data) {
+          const parsed = Object.entries(data).map(([id, value]) => ({
+            id,
+            ...value,
+          }));
+          setHistoryData(parsed.reverse()); // untuk tampilkan terbaru di atas
+        } else {
+          setHistoryData([]);
+        }
+      });
+    } else {
+      showMessage({
+        message: 'User tidak ditemukan.',
+        type: 'danger',
+      });
+    }
+  }, []);
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Your History</Text>
       <FlatList
-        data={dummyHistory}
+        data={historyData}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <HistoryItem item={item} />}
-        contentContainerStyle={{ paddingBottom: 80 }} // untuk jarak bawah
+        contentContainerStyle={{ paddingBottom: 80 }}
+        ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20 }}>Belum ada riwayat</Text>}
       />
 
       {/* Bottom Navigation */}
@@ -74,7 +97,7 @@ const HistoryScreen = ({ navigation }) => {
 
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => navigation.navigate('Profile')} // jika belum ada bisa dikosongkan dulu
+          onPress={() => navigation.navigate('Profile')}
           activeOpacity={0.6}
         >
           <Image

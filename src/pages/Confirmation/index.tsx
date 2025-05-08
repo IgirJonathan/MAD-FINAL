@@ -1,10 +1,54 @@
 // src/pages/Confirmation/index.js
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
+import { getDatabase, ref, push } from 'firebase/database';
+import { getAuth } from 'firebase/auth';
+import { showMessage } from 'react-native-flash-message';
 
 const Confirmation = ({ route, navigation }) => {
-  // Ambil data dari parameter navigasi
   const { weight, location, paymentMethod, notes } = route.params;
+
+  const handleDone = async () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (user) {
+      const db = getDatabase();
+      const orderRef = ref(db, 'orders/' + user.uid);
+      const orderData = {
+        weight,
+        location,
+        paymentMethod,
+        notes: notes || '',
+        createdAt: new Date().toISOString(),
+      };
+
+      try {
+        await push(orderRef, orderData);
+        showMessage({
+          message: 'Order berhasil disimpan!',
+          type: 'success',
+        });
+        navigation.replace('OrderCompleted');
+      } catch (error) {
+        showMessage({
+          message: error.message,
+          type: 'danger',
+        });
+      }
+    } else {
+      showMessage({
+        message: 'User tidak ditemukan. Silakan login kembali.',
+        type: 'danger',
+      });
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -23,38 +67,39 @@ const Confirmation = ({ route, navigation }) => {
         <Text style={styles.value}>{paymentMethod}</Text>
 
         <Text style={styles.label}>Price :</Text>
-        <Text style={styles.value}>Rp80.000 + (If there are + additional charges)</Text>
+        <Text style={styles.value}>
+          Rp80.000 + (If there are + additional charges)
+        </Text>
       </View>
 
       {/* Payment Guide */}
       <View style={styles.section}>
         <Text style={styles.guideHeader}>Payment Guide :</Text>
         <Text style={styles.guideText}>
-          1. Your Laundry will be picked up and weighed by the courier{"\n"}
-          2. Your total bill will be given by the courier{"\n"}
+          1. Your Laundry will be picked up and weighed by the courier{'\n'}
+          2. Your total bill will be given by the courier{'\n'}
           3. Make the payment according to the price given
         </Text>
       </View>
 
       {/* Action Buttons */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.editButton}
           onPress={() => navigation.goBack()}
         >
           <Text style={styles.editText}>Edit</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={styles.doneButton}
-          onPress={() => navigation.navigate('OrderCompleted')}
-        >
+        <TouchableOpacity style={styles.doneButton} onPress={handleDone}>
           <Text style={styles.doneText}>Done</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 };
+
+export default Confirmation;
 
 const styles = StyleSheet.create({
   container: {
@@ -130,5 +175,3 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
-
-export default Confirmation;
