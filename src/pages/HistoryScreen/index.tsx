@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+
 import {
   View,
   Text,
@@ -18,7 +19,6 @@ const HistoryItem = ({ item }) => {
 
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>Wash And Fold</Text>
       <Text>Date: {formattedDate}</Text>
       <Text>Weight: {item.weight || 'N/A'} KG</Text>
       <Text>Payment: {item.paymentMethod || 'N/A'}</Text>

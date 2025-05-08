@@ -33,22 +33,28 @@ const WelcomeScreen = ({ navigation }) => {
             <Text style={styles.cardText}>Wash And Fold</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.card} activeOpacity={0.7}>
+          <TouchableOpacity style={styles.card}
+            onPress={() => navigation.navigate('SplashPayment2')}  
+            activeOpacity={0.7}>
+            
             <Image
               source={require('../../assets/drywashhh.png')}
               style={styles.cardImage}
             />
-            <Text style={styles.cardText}>Dry Wash (Coming soon)</Text>
+            <Text style={styles.cardText}>Dry Wash </Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.row}>
-          <TouchableOpacity style={[styles.card, styles.centerCard]} activeOpacity={0.7}>
+          <TouchableOpacity style={[styles.card, styles.centerCard]}
+            onPress={() => navigation.navigate('SplashPayment3')} 
+            activeOpacity={0.7}>
+            
             <Image
               source={require('../../assets/dryCleanMaybe.png')}
               style={styles.cardImage}
             />
-            <Text style={styles.cardText}>Wash Delicate{'\n'}and Dry (coming Soon)</Text>
+            <Text style={styles.cardText}>Wash Delicate{'\n'}and Dry </Text>
           </TouchableOpacity>
         </View>
       </View>

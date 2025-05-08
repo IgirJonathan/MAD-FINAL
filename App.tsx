@@ -13,6 +13,8 @@ import './src/config/Firebase'
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import FlashMessage from 'react-native-flash-message';
+import SplashPayment2 from './src/pages/SplashPayment2';
+import SplashPayment3 from './src/pages/SplashPayment3';
 
 const Stack = createNativeStackNavigator();
 
@@ -62,6 +64,16 @@ const App = () => {
         <Stack.Screen
           name="SplashPayment"
           component={SplashPayment}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="SplashPayment2"
+          component={SplashPayment2}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="SplashPayment3"
+          component={SplashPayment3}
           options={{ headerShown: false }}
         />
         <Stack.Screen
